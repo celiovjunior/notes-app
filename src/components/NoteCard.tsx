@@ -13,7 +13,7 @@ export function NoteCard(props: NoteCardProps) {
 
       <Dialog.Trigger className='text-left rounded-md flex flex-col bg-slate-800 p-5 gap-3 space-y-3 overflow-hidden relative outline-none hover:ring-2 hover:ring-slate-600 focus-visible:ring-2 focus-visible:ring-lime-400'>
         <span className='text-sm font-medium text-slate-200'>
-          { props.date.toISOString() }
+          { formatDistanceToNow(props.date) }
         </span>
         <p className='text-sm leading-6 text-slate-300'>
           { props.content }
@@ -31,7 +31,7 @@ export function NoteCard(props: NoteCardProps) {
 
           <div className='flex flex-1 flex-col gap3 p-5'>
             <span className='text-sm font-medium text-slate-200'>
-              { formatDistanceToNow(props.date.toISOString()) }
+              { formatDistanceToNow(props.date) }
             </span>
             <p className='text-sm leading-6 text-slate-300'>
               { props.content }
