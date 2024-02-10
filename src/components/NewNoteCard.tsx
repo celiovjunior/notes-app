@@ -7,6 +7,8 @@ interface NewNoteCardProps {
   onNoteCreated: (content: string) => void,
 }
 
+let speechRecognition: SpeechRecognition | null = null
+
 export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   const [shouldShowOnBoarding, setShouldShowOnBoarding] = useState(true)
   const [isRecording, setIsRecording] = useState(false)
@@ -27,6 +29,10 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   function handleSaveNote(event: FormEvent) {
     event.preventDefault()
 
+    if (content === '') {
+      return
+    }
+
     onNoteCreated(content)
 
     setContent('')
@@ -36,7 +42,45 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   }
 
   function handleStartRecording() {
+    const isSpeechRecognitionAPIAvaiable =  'SpeechRecognition' in window
+    || 'webkitSpeechRecognition' in window
+
+    if (!isSpeechRecognitionAPIAvaiable) {
+      alert("Your browser doesn't have support for speech recognition. We recomend use Chrome, Safari or Edge.")
+      return
+    }
+
     setIsRecording(true);
+    setShouldShowOnBoarding(false)
+
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition
+    
+    speechRecognition = new SpeechRecognitionAPI()
+    speechRecognition.lang = 'en-NZ'
+    speechRecognition.continuous = true
+    speechRecognition.maxAlternatives = 1
+    speechRecognition.interimResults = true
+
+    speechRecognition.onresult = (event) => {
+      const transcription = Array.from(event.results).reduce((text, result) => {
+        return text.concat(result[0].transcript)
+      }, '')
+      setContent(transcription)
+    }
+
+    speechRecognition.onerror = (event) => {
+      console.error(event)
+    }
+
+    speechRecognition.start();
+  }
+
+  function handleStopRecording() {
+    setIsRecording(false);
+
+    if (speechRecognition !== null) {
+      speechRecognition.stop()
+    }
   }
 
   return (
@@ -54,7 +98,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
             <X className='w-5 h-5' />
           </Dialog.Close>
 
-          <form onSubmit={handleSaveNote} className='flex-1 flex flex-col'>
+          <form className='flex-1 flex flex-col'>
             <div className='flex flex-1 flex-col gap3 p-5'>
               <span className='text-sm font-medium text-slate-200'>
                 Add a new note
@@ -75,14 +119,17 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
 
             {isRecording ? (
               <button 
-              type='submit'
-              className='w-full bg-slate-900 py-4 text-center text-sm text-slate-300 outline-none font-medium hover:text-slate-100'
+              type='button'
+              onClick={handleStopRecording}
+              className='w-full flex items-center justify-center gap-2 bg-slate-900 py-4 text-center text-sm text-slate-300 outline-none font-medium hover:text-slate-100'
               >
+                <div className='size-3 rounded-full bg-red-500 animate-pulse' />
                 Recording! (click to stop)
               </button>
             ) : (
               <button 
-              type='submit'
+              type='button'
+              onClick={handleSaveNote}
               className='w-full bg-lime-400 py-4 text-center text-sm text-lime-950 outline-none font-medium hover:bg-lime-500'
               >
                 Save note
