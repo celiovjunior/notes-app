@@ -1,5 +1,4 @@
 import { ChangeEvent, useState } from 'react'
-import logo from './assets/logo.svg'
 import { NewNoteCard } from './components/NewNoteCard'
 import { NoteCard } from './components/NoteCard'
 
@@ -52,7 +51,7 @@ export function App() {
 
   return (
     <div className='mx-auto max-w-6xl my-12 space-y-6 px-5'>
-      <img src={logo} alt="Next level week event logo" />
+      {/* <img src={logo} alt="Next level week event logo" /> */}
 
       <form className='w-full'>
         <input 
